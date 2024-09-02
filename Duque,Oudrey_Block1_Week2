@@ -1,0 +1,92 @@
+<?php
+
+class Book {
+  public $title;
+  protected $author;
+  private $price;
+  
+  public function __construct($title, $author, $price){
+    $this->title = $title;
+    $this->author = $author;
+    $this->price = $price;
+  }
+  
+  public function getDetails() {
+    return "Title: $this->title, Author: $this->author, Price: $$this->price";
+  }
+  
+  public function setPrice($price) {
+    $this->price = $price;
+  }
+  
+  public function __call($name, $arguments) {
+    if ($name === 'updateStock') {
+      return "Stock updated for '$this->title' with arguments: " . implode(', ', $arguments);
+    }
+    return "Method '$name' does not exist.";
+  }
+}
+
+class Library {
+  public $name;
+  private $books = [];
+  
+  public function __construct($name) {
+    $this->name = $name;
+  }
+    
+  public function addBook(Book $book) {
+    $this->books[] = $book;
+  }
+
+  public function removeBook($title) {
+    foreach ($this->books as $index => $book) {
+      if ($book->title === $title) {
+        unset($this->books[$index]);
+        $this->books = array_values($this->books);
+        return "Book '$title' removed from the library.";
+      }
+    }
+    return "Book '$title' not found.";
+  }
+  
+  public function listBooks() {
+    if (empty($this->books)) {
+      return "No books in the library.";
+    }
+    $bookList = "Books in the library:<br>";
+    foreach ($this->books as $book) {
+      $bookList .= $book->getDetails() . "<br>";
+    }
+    return $bookList;
+  }
+  
+  public function __destruct() {
+    echo "The Library '$this->name' is now closed.<br>";
+  }
+}
+
+$book1 = new Book("Harry Potter", "J. K. Rowling", 9.99);
+$book2 = new Book("The Da Vinci Code", "Dan Brown", 5.99);
+$book3 = new Book("The Girl on the Train", "Paula Hawkins", 12.39);
+$book4 = new Book("Blown by the Wind", "Jonaxx", 8.50);
+
+$library = new Library("City Library");
+
+$library->addBook($book1);
+$library->addBook($book2);
+$library->addBook($book3);
+$library->addBook($book4);
+
+$book1->setPrice(10.00);
+echo "Updated price of '$book1->title': " . $book1->getDetails() . "<br>";
+
+echo $book3->updateStock(40) . "<br>";
+
+echo $library->removeBook("Harry Potter") . "<br>";
+
+echo $library->listBooks();
+
+unset($library);
+
+?>
